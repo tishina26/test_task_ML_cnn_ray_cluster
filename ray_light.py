@@ -27,7 +27,7 @@ def train_mnist(config):
     y_train = tf.keras.utils.to_categorical(y_train, num_classes)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
-    if (Path("./,model_rnn.h5").exists()):
+    if (Path("./model_rnn.h5").exists()):
         model = tf.keras.models.load_model('/home/uliana/PycharmProjects/pythonProject2/model_rnn.h5')
     else:
         model = Sequential([

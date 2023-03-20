@@ -13,6 +13,10 @@ from tensorflow.keras.models import Sequential
 # Импортируем набор данных MNIST
 from tensorflow.keras.datasets import mnist
 
+from pathlib import Path
+
+# надо как-то передавать этот параметр
+CPUS = 4
 
 def train_mnist(config):
     num_classes = 10
@@ -23,16 +27,20 @@ def train_mnist(config):
     y_train = tf.keras.utils.to_categorical(y_train, num_classes)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 
-    model = Sequential([
-        layers.Dense(config["neiron_0"], activation=config["activation_0"], input_shape=(x_train[0].shape)),
-        layers.Dense(config["neiron_1"], activation=config["activation_1"], input_shape=(x_train[0].shape)),
-        layers.Flatten(),
-        layers.Dense(10, activation='softmax')
-    ])
+    if (Path("./,model_rnn.h5").exists()):
+        model = tf.keras.models.load_model('/home/uliana/PycharmProjects/pythonProject2/model_rnn.h5')
+    else:
+        model = Sequential([
+            layers.Dense(config["neiron_0"], activation=config["activation_0"], input_shape=(x_train[0].shape)),
+            layers.Dense(config["neiron_1"], activation=config["activation_1"], input_shape=(x_train[0].shape)),
+            layers.Flatten(),
+            layers.Dense(10, activation='softmax')
+        ])
 
     model.compile(optimizer=config["optimizer"], loss='categorical_crossentropy', metrics=['accuracy'])
+    checkpoint = tf.keras.callbacks.ModelCheckpoint("./model_rnn.h5", save_best_only=True)
     model.fit(x_train, y_train, batch_size=128, epochs=config["epochs"], verbose=1, validation_split=0.1,
-              callbacks=[TuneReportCallback({"mean_accuracy": "accuracy"})], )
+              callbacks=[checkpoint, TuneReportCallback({"mean_accuracy": "accuracy"})], )
 
     loss, accuracy = model.evaluate(x_test, y_test, verbose=1)
 
@@ -53,7 +61,7 @@ if __name__ == "__main__":
     }
 
     tuner = tune.Tuner(
-        tune.with_resources(train_mnist, resources={"cpu": 2, "gpu": 0}),
+        tune.with_resources(train_mnist, resources={"cpu": CPUS, "gpu": 0}),
         tune_config=tune.TuneConfig(
             num_samples=10,
             metric="mean_accuracy",

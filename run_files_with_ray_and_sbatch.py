@@ -12,15 +12,15 @@ if __name__ == "__main__":
 
     p1 = subprocess.Popen(RUN_TEMPLATE.format(
         cpus=4,
-        priority=-1,
+        priority=-3,
         file=FILE_1
-    ))
+    ).split())
 
     p2 = subprocess.Popen(RUN_TEMPLATE.format(
         cpus=1,
-        priority=-10,
+        priority=-1,
         file=FILE_2
-    ))
+    ).split())
 
     for i in p1, p2:
         i.wait()
